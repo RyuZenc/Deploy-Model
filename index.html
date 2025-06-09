@@ -70,6 +70,54 @@
             reader.readAsDataURL(file);
         });
     </script>
+<script>
+    document.getElementById('predict-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
 
+        const fileInput = document.getElementById('image-upload');
+        const resultDiv = document.getElementById('result');
+        
+        if (fileInput.files.length === 0) {
+            resultDiv.innerHTML = '<p style="color: red;">Please select an image file first.</p>';
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = async () => {
+            // We send the image as a base64 string, without the data URI prefix
+            const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
+
+            resultDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                // This endpoint matches the redirect rule in netlify.toml
+                const response = await fetch('/api/predict', { 
+                    method: 'POST',
+                    body: base64String, // The serverless function expects a base64 string
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const confidence = (data.confidence * 100).toFixed(2);
+                    resultDiv.innerHTML = `
+                        <p><strong>Class:</strong> ${data.class}</p>
+                        <p><strong>Confidence:</strong> ${confidence}%</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<p style="color: red;">An unexpected error occurred. Check the console for details.</p>';
+            }
+        };
+
+        // This reads the file and triggers the onloadend event above
+        reader.readAsDataURL(file);
+    });
+</script>
 </body>
 </html>
