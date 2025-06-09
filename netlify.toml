@@ -16,6 +16,6 @@
   # This rule takes all incoming requests to your site...
   from = "/*"
   # ...and forwards them to your Flask app to be handled.
-  to = "/app.py"
+  to = "/main.html"
   # A status of 200 makes it act as a proxy.
   status = 200
