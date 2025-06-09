@@ -5,53 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Palm Disease Detection</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        input[type="file"] {
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #e9ecef;
-        }
+        /* Your CSS styles remain the same */
     </style>
 </head>
 <body>
@@ -81,33 +35,39 @@
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
+            const file = fileInput.files[0];
+            const reader = new FileReader();
 
-            resultDiv.innerHTML = '<p>Loading...</p>';
+            reader.onloadend = async () => {
+                const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
 
-            try {
-                // IMPORTANT: Replace with your actual API endpoint URL
-                const response = await fetch('/predict', { 
-                    method: 'POST',
-                    body: formData,
-                });
+                resultDiv.innerHTML = '<p>Loading...</p>';
 
-                const data = await response.json();
+                try {
+                    // IMPORTANT: Use the new serverless function endpoint
+                    const response = await fetch('/api/predict', { 
+                        method: 'POST',
+                        body: base64String,
+                    });
 
-                if (response.ok) {
-                    const confidence = (data.confidence * 100).toFixed(2);
-                    resultDiv.innerHTML = `
-                        <p><strong>Class:</strong> ${data.class}</p>
-                        <p><strong>Confidence:</strong> ${confidence}%</p>
-                    `;
-                } else {
-                    resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        const confidence = (data.confidence * 100).toFixed(2);
+                        resultDiv.innerHTML = `
+                            <p><strong>Class:</strong> ${data.class}</p>
+                            <p><strong>Confidence:</strong> ${confidence}%</p>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    resultDiv.innerHTML = '<p style="color: red;">An unexpected error occurred. Check the console for details.</p>';
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                resultDiv.innerHTML = '<p style="color: red;">An unexpected error occurred. Check the console for details.</p>';
-            }
+            };
+
+            reader.readAsDataURL(file);
         });
     </script>
 
