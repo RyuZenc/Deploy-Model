@@ -14,8 +14,8 @@
 
 [[redirects]]
   # This rule takes all incoming requests to your site...
-  from = "/app.py"
+  from = "/*"
   # ...and forwards them to your Flask app to be handled.
-  to = "/main.html"
+  to = "/app.py"
   # A status of 200 makes it act as a proxy.
   status = 200
