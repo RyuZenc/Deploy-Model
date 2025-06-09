@@ -1,0 +1,21 @@
+# Netlify configuration file
+
+[build]
+  # Command to install all dependencies from requirements.txt
+  command = "pip install -r requirements.txt"
+  # Netlify needs a publish directory, but a Flask app doesn't have one.
+  # We point to a dummy directory.
+  publish = "."
+
+[functions]
+  # This tells Netlify to look for serverless functions in the root directory.
+  # Your app.py will be treated as a function.
+  directory = "/"
+
+[[redirects]]
+  # This rule takes all incoming requests to your site...
+  from = "/*"
+  # ...and forwards them to your Flask app to be handled.
+  to = "/app.py"
+  # A status of 200 makes it act as a proxy.
+  status = 200
